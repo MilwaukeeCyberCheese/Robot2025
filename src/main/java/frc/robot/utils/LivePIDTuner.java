@@ -1,13 +1,13 @@
 package frc.robot.utils;
 
-import com.revrobotics.SparkPIDController;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 /**
  * An object that will automatically update a PID controller's constants based
  * on the SmartDashboard
  */
 public class LivePIDTuner {
-    private SparkPIDController controller;
+    private SparkMaxConfig controller;
     private DashboardUpdater<PIDConstants> pidConstants;
 
     /**
@@ -17,7 +17,7 @@ public class LivePIDTuner {
      * @param controller
      * @param constants
      */
-    public LivePIDTuner(String name, SparkPIDController controller, PIDConstants constants) {
+    public LivePIDTuner(String name, SparkMaxConfig controller, PIDConstants constants) {
         this.controller = controller;
         pidConstants = new DashboardUpdater<PIDConstants>(name, constants);
     }
@@ -27,7 +27,7 @@ public class LivePIDTuner {
      */
     public void update() {
         pidConstants.update();
-        CustomUtils.setSparkPID(controller, pidConstants.get());
+        setSparkPID(controller, pidConstants.get());
     }
 
     /**
@@ -37,5 +37,15 @@ public class LivePIDTuner {
     public PIDConstants getConstants() {
         pidConstants.update();
         return pidConstants.get();
+    }
+
+    /**
+     * Set the PID constants of a SparkPIDController
+     *
+     * @param controller
+     * @param constants
+     */
+    public static void setSparkPID(SparkMaxConfig controller, PIDConstants constants) {
+        controller.closedLoop.p(constants.kP).i(constants.kI).d(constants.kD).velocityFF(constants.kFF);
     }
 }
