@@ -26,7 +26,7 @@ import java.io.Serializable;
 
 /**
  * Simulates a stop watch with a <em>lap</em> counter.
- * 
+ *
  * @version <tt>$Revision: 2800 $</tt>
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  */
@@ -49,48 +49,39 @@ public class Stopwatch implements Serializable, Cloneable {
   /** Is the watch started */
   protected boolean running = false;
 
-  /**
-   * Default constructor.
-   */
-  public Stopwatch() {
-  }
+  /** Default constructor. */
+  public Stopwatch() {}
 
   /**
    * Construct a StopWatch.
-   * 
-   * @param running
-   *                Start the watch
+   *
+   * @param running Start the watch
    */
   public Stopwatch(final boolean running) {
-    if (running)
-      start();
+    if (running) start();
   }
 
   /**
    * Start the watch.
-   * 
-   * @param reset
-   *              True to reset the watch prior to starting.
+   *
+   * @param reset True to reset the watch prior to starting.
    */
   public void start(final boolean reset) {
     if (!running) {
-      if (reset)
-        reset();
+      if (reset) reset();
       start = System.currentTimeMillis();
       running = true;
     }
   }
 
-  /**
-   * Start the watch.
-   */
+  /** Start the watch. */
   public void start() {
     start(false);
   }
 
   /**
    * Stop the watch.
-   * 
+   *
    * @return Elapsed time or 0 if the watch was never started.
    */
   public long stop() {
@@ -107,9 +98,7 @@ public class Stopwatch implements Serializable, Cloneable {
     return lap;
   }
 
-  /**
-   * Reset the watch.
-   */
+  /** Reset the watch. */
   public void reset() {
     start = -1;
     stop = -1;
@@ -120,7 +109,7 @@ public class Stopwatch implements Serializable, Cloneable {
 
   /**
    * Get the <i>lap</i> count.
-   * 
+   *
    * @return The <i>lap</i> count.
    */
   public int getLapCount() {
@@ -129,7 +118,7 @@ public class Stopwatch implements Serializable, Cloneable {
 
   /**
    * Get the elapsed <i>lap</i> time since the watch was started.
-   * 
+   *
    * @return Elapsed <i>lap</i> time or 0 if the watch was never started
    */
   public long getLapTime() {
@@ -144,7 +133,7 @@ public class Stopwatch implements Serializable, Cloneable {
 
   /**
    * Get the average <i>lap</i> time since the watch was started.
-   * 
+   *
    * @return Average <i>lap</i> time since the watch was started.
    */
   public long getAverageLapTime() {
@@ -153,7 +142,7 @@ public class Stopwatch implements Serializable, Cloneable {
 
   /**
    * Get the elapsed time since the watch was created or last reset.
-   * 
+   *
    * @return Elapsed time or 0 if the watch was never started.
    */
   public long getTime() {
@@ -168,16 +157,14 @@ public class Stopwatch implements Serializable, Cloneable {
 
   /**
    * Check if the watch is running.
-   * 
+   *
    * @return True if the watch is running.
    */
   public boolean isRunning() {
     return running;
   }
 
-  /**
-   * Return a string representation.
-   */
+  /** Return a string representation. */
   public String toString() {
     StringBuffer buff = new StringBuffer();
 
