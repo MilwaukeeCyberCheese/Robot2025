@@ -6,7 +6,7 @@ on:
     types: [opened, synchronize, reopened]
 
 concurrency:
-  group: ${{ github.head_ref }}
+  group: ${{ github.build }}-${{ github.head_ref }}
   cancel-in-progress: true
 
 jobs:
