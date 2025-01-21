@@ -1,6 +1,14 @@
 name: Linting
-on: [push, pull_request]
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.linting }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   spotless:
     # The type of runner that the job will run on
