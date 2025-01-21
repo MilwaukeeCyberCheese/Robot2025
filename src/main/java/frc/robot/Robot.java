@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -39,7 +38,7 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     vision = new Vision();
 
-    if (isSimulation()){
+    if (isSimulation()) {
       DriverStation.refreshData();
       DriverStation.silenceJoystickConnectionWarning(true);
     }
@@ -67,10 +66,10 @@ public class Robot extends TimedRobot {
     var visionEst = vision.getEstimatedGlobalPose();
     visionEst.ifPresent(est -> {
       var estStdDevs = vision.getEstimationStdDevs();
-      m_robotContainer.m_driveSubsystem.addVisionMeasurement(
-        est.estimatedPose.toPose2d(), 
-        est.timestampSeconds, 
-        estStdDevs);
+      RobotContainer.m_driveSubsystem.addVisionMeasurement(
+          est.estimatedPose.toPose2d(),
+          est.timestampSeconds,
+          estStdDevs);
     });
     CommandScheduler.getInstance().run();
     SmartDashboard.putData(CommandScheduler.getInstance());
