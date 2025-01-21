@@ -260,14 +260,14 @@ public class DriveSubsystem extends SubsystemBase {
     return m_gyro.getRate(IMUAxis.kZ) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
 
-    /** See {@link SwerveDrivePoseEstimator#addVisionMeasurement(Pose2d, double)}. */
-    public void addVisionMeasurement(Pose2d visionMeasurement, double timestampSeconds) {
-      m_odometry.addVisionMeasurement(visionMeasurement, timestampSeconds);
-    }
+  /** See {@link SwerveDrivePoseEstimator#addVisionMeasurement(Pose2d, double)}. */
+  public void addVisionMeasurement(Pose2d visionMeasurement, double timestampSeconds) {
+    m_odometry.addVisionMeasurement(visionMeasurement, timestampSeconds);
+  }
 
-    /** See {@link SwerveDrivePoseEstimator#addVisionMeasurement(Pose2d, double, Matrix)}. */
-    public void addVisionMeasurement(
-      Pose2d visionMeasurement, double timestampSeconds, Matrix<N3, N1> stdDevs) {
-      m_odometry.addVisionMeasurement(visionMeasurement, timestampSeconds, stdDevs);
-    }
+  /** See {@link SwerveDrivePoseEstimator#addVisionMeasurement(Pose2d, double, Matrix)}. */
+  public void addVisionMeasurement(
+    Pose2d visionMeasurement, double timestampSeconds, Matrix<N3, N1> stdDevs) {
+    m_odometry.addVisionMeasurement(visionMeasurement, timestampSeconds, stdDevs);
+  }
 }

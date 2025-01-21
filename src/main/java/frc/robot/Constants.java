@@ -52,7 +52,7 @@ public final class Constants {
   }
 
   public static class Vision {
-    public static final String kCameraName = "YOUR CAMERA NAME";
+    public static final String kCameraName = "Brio_100";
     // Cam mounted facing forward, half a meter forward of center, half a meter up
     // from center.
     public static final Transform3d kRobotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5),
