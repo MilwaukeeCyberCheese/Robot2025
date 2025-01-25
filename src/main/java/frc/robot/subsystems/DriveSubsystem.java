@@ -90,6 +90,10 @@ public class DriveSubsystem extends SubsystemBase {
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
   }
 
+  public void setSysidVoltage(double voltage){
+    m_frontLeft.setDriveVoltage(voltage);
+  }
+
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
@@ -289,5 +293,13 @@ public class DriveSubsystem extends SubsystemBase {
   public void addVisionMeasurement(
       Pose2d visionMeasurement, double timestampSeconds, Matrix<N3, N1> stdDevs) {
     m_odometry.addVisionMeasurement(visionMeasurement, timestampSeconds, stdDevs);
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    m_frontLeft.simulationPeriodic(0.02);
+    m_frontRight.simulationPeriodic(0.02);
+    m_rearLeft.simulationPeriodic(0.02);
+    m_rearRight.simulationPeriodic(0.02);
   }
 }

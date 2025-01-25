@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.sim.SparkMaxSim;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -15,11 +16,20 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import frc.robot.Constants;
 
 public class MAXSwerveModule {
   private final SparkMax m_drivingSpark;
   private final SparkMax m_turningSpark;
+
+  private final SparkMaxSim m_drivingSparkSim;
+  private final SparkMaxSim m_turningSparkSim;
+  // private final FlywheelSim m_driveFlywheel;
+  // private final FlywheelSim m_turningFlywheel;
 
   private final RelativeEncoder m_drivingEncoder;
   private final AbsoluteEncoder m_turningEncoder;
@@ -38,6 +48,9 @@ public class MAXSwerveModule {
   public MAXSwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset) {
     m_drivingSpark = new SparkMax(drivingCANId, MotorType.kBrushless);
     m_turningSpark = new SparkMax(turningCANId, MotorType.kBrushless);
+    
+    m_drivingSparkSim = new SparkMaxSim(m_drivingSpark, DCMotor.getNeoVortex(1));
+    m_turningSparkSim = new SparkMaxSim(m_turningSpark, DCMotor.getNeo550(1));
 
     m_drivingEncoder = m_drivingSpark.getEncoder();
     m_turningEncoder = m_turningSpark.getAbsoluteEncoder();
@@ -89,6 +102,14 @@ public class MAXSwerveModule {
   }
 
   /**
+   * Sets the drive motor output.
+   * @param voltage
+   */
+  public void setDriveVoltage(double voltage) {
+    m_drivingSpark.setVoltage(voltage);
+  }
+
+  /**
    * Sets the desired state for the module.
    *
    * @param desiredState Desired state with speed and angle.
@@ -116,4 +137,20 @@ public class MAXSwerveModule {
   public void resetEncoders() {
     m_drivingEncoder.setPosition(0);
   }
+
+  public void simulationPeriodic(double dt) {
+    m_drivingSparkSim.setBusVoltage(RoboRioSim.getVInVoltage());
+    m_turningSparkSim.setBusVoltage(RoboRioSim.getVInVoltage());
+
+    m_drivingSparkSim.setAppliedOutput(m_drivingSpark.getAppliedOutput());
+    m_turningSparkSim.setAppliedOutput(m_turningSpark.getAppliedOutput());
+
+    // m_drivingSparkSim.iterate(dt);
+    // m_turningSparkSim.iterate(dt);
+
+    double drivingPosition = m_drivingSparkSim.getPosition();
+    double drivingVelocity = m_drivingSparkSim.getVelocity();
+    double turningPosition = m_turningSparkSim.getPosition();
+    double turningVelocity = m_turningSparkSim.getVelocity();
+}
 }

@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import org.littletonrobotics.urcl.URCL;
+
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,6 +34,9 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our
     // autonomous chooser on the dashboard.
+    DataLogManager.start();
+    URCL.start();
+
     m_robotContainer = new RobotContainer();
     vision = new Vision();
 
