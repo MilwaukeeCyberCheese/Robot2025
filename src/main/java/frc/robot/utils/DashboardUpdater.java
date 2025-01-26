@@ -46,8 +46,9 @@ public class DashboardUpdater<E> {
           case "Boolean" -> Boolean.parseBoolean(val);
           case "PIDConstants" -> PIDConstants.parsePIDConstants(val);
           case "String" -> val;
-          default -> throw new IllegalArgumentException(
-              "DashboardUpdater: Unsupported type: " + value.getClass().getSimpleName());
+          default ->
+              throw new IllegalArgumentException(
+                  "DashboardUpdater: Unsupported type: " + value.getClass().getSimpleName());
         };
 
     return true;
