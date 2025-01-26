@@ -12,6 +12,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -40,7 +41,14 @@ public class DriveSubsystem extends SubsystemBase {
       new SlewRateLimiter(Constants.DriveConstants.kRotationalSlewRate);
   private double m_prevTime = WPIUtilJNI.now() * 1e-6;
 
+  private long lastUpdate = System.currentTimeMillis();
+
   private Field2d m_field = new Field2d();
+
+  private Pose2d m_frontLeftPose = new Pose2d();
+  private Pose2d m_frontRightPose = new Pose2d();
+  private Pose2d m_rearLeftPose = new Pose2d();
+  private Pose2d m_rearRightPose = new Pose2d();
 
   // Create MAXSwerveModules
   private final MAXSwerveModule m_frontLeft =
@@ -112,6 +120,34 @@ public class DriveSubsystem extends SubsystemBase {
           m_rearRight.getPosition()
         });
     m_field.setRobotPose(getPose());
+    // we need to get the translation of each module to the center of the robot from constants, and
+    // add rotation from the swerve module's state
+    Translation2d[] moduleTranslations = DriveConstants.kDriveKinematics.getModules();
+    var translationX = getPose().getTranslation().getX();
+    var translationY = getPose().getTranslation().getY();
+    m_frontLeftPose =
+        new Pose2d(
+            moduleTranslations[0].getX() + translationX,
+            moduleTranslations[0].getY() + translationY,
+            m_frontLeft.getState().angle);
+    m_frontRightPose =
+        new Pose2d(
+            moduleTranslations[1].getX() + translationX,
+            moduleTranslations[1].getY() + translationY,
+            m_frontRight.getState().angle);
+    m_rearLeftPose =
+        new Pose2d(
+            moduleTranslations[2].getX() + translationX,
+            moduleTranslations[2].getY() + translationY,
+            m_rearLeft.getState().angle);
+    m_rearRightPose =
+        new Pose2d(
+            moduleTranslations[3].getX() + translationX,
+            moduleTranslations[3].getY() + translationY,
+            m_rearRight.getState().angle);
+    m_field
+        .getObject("SwerveModules")
+        .setPoses(m_frontLeftPose, m_frontRightPose, m_rearLeftPose, m_rearRightPose);
   }
 
   /**
@@ -301,11 +337,14 @@ public class DriveSubsystem extends SubsystemBase {
     m_odometry.addVisionMeasurement(visionMeasurement, timestampSeconds, stdDevs);
   }
 
+  /** Updates swerve module simulations. */
   @Override
   public void simulationPeriodic() {
-    m_frontLeft.simulationPeriodic(0.02);
-    m_frontRight.simulationPeriodic(0.02);
-    m_rearLeft.simulationPeriodic(0.02);
-    m_rearRight.simulationPeriodic(0.02);
+    var dt = (System.currentTimeMillis() - lastUpdate) / 1000.0;
+    lastUpdate = System.currentTimeMillis();
+    m_frontLeft.simulationPeriodic(dt);
+    m_frontRight.simulationPeriodic(dt);
+    m_rearLeft.simulationPeriodic(dt);
+    m_rearRight.simulationPeriodic(dt);
   }
 }

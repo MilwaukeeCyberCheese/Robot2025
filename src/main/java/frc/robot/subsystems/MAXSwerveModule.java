@@ -66,7 +66,7 @@ public class MAXSwerveModule {
         new FlywheelSim(
             LinearSystemId.createFlywheelSystem(
                 DCMotor.getNeo550(1),
-                0.00125, // J = 1/2 * m * r^2 = 0.5 * 1 * 0.05^2
+                0.0125, // J = 1/2 * m * r^2 = 0.5 * 1 * 0.05^2
                 21.43), // L2 turn reduction
             DCMotor.getNeo550(1));
 
