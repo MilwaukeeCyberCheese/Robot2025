@@ -28,8 +28,8 @@ public class MAXSwerveModule {
 
   private final SparkMaxSim m_drivingSparkSim;
   private final SparkMaxSim m_turningSparkSim;
-  // private final FlywheelSim m_driveFlywheel;
-  // private final FlywheelSim m_turningFlywheel;
+  private final FlywheelSim m_driveFlywheel;
+  private final FlywheelSim m_turningFlywheel;
 
   private final RelativeEncoder m_drivingEncoder;
   private final AbsoluteEncoder m_turningEncoder;
@@ -48,9 +48,27 @@ public class MAXSwerveModule {
   public MAXSwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset) {
     m_drivingSpark = new SparkMax(drivingCANId, MotorType.kBrushless);
     m_turningSpark = new SparkMax(turningCANId, MotorType.kBrushless);
-    
+
     m_drivingSparkSim = new SparkMaxSim(m_drivingSpark, DCMotor.getNeoVortex(1));
     m_turningSparkSim = new SparkMaxSim(m_turningSpark, DCMotor.getNeo550(1));
+    // TODO: get these values from the robot itself
+    // heavier load, higher inertia
+    m_driveFlywheel =
+        new FlywheelSim(
+            LinearSystemId.createFlywheelSystem(
+                DCMotor.getNeoVortex(1),
+                0.125, // J = 1/2 * m * r^2 = 0.5 * 50 * 0.05^2
+                6.75), // L2 drive reduction
+            DCMotor.getNeoVortex(1));
+
+    // lighter load, lower inertia
+    m_turningFlywheel =
+        new FlywheelSim(
+            LinearSystemId.createFlywheelSystem(
+                DCMotor.getNeo550(1),
+                0.00125, // J = 1/2 * m * r^2 = 0.5 * 1 * 0.05^2
+                21.43), // L2 turn reduction
+            DCMotor.getNeo550(1));
 
     m_drivingEncoder = m_drivingSpark.getEncoder();
     m_turningEncoder = m_turningSpark.getAbsoluteEncoder();
@@ -103,6 +121,7 @@ public class MAXSwerveModule {
 
   /**
    * Sets the drive motor output.
+   *
    * @param voltage
    */
   public void setDriveVoltage(double voltage) {
@@ -139,18 +158,20 @@ public class MAXSwerveModule {
   }
 
   public void simulationPeriodic(double dt) {
-    m_drivingSparkSim.setBusVoltage(RoboRioSim.getVInVoltage());
-    m_turningSparkSim.setBusVoltage(RoboRioSim.getVInVoltage());
+    double driveVoltage = m_drivingSparkSim.getAppliedOutput() * RoboRioSim.getVInVoltage();
+    double turnVoltage = m_turningSparkSim.getAppliedOutput() * RoboRioSim.getVInVoltage();
 
-    m_drivingSparkSim.setAppliedOutput(m_drivingSpark.getAppliedOutput());
-    m_turningSparkSim.setAppliedOutput(m_turningSpark.getAppliedOutput());
+    m_driveFlywheel.setInputVoltage(driveVoltage);
+    m_turningFlywheel.setInputVoltage(turnVoltage);
+    m_driveFlywheel.update(dt);
+    m_turningFlywheel.update(dt);
 
-    // m_drivingSparkSim.iterate(dt);
-    // m_turningSparkSim.iterate(dt);
+    double driveVelocity = m_driveFlywheel.getAngularVelocityRadPerSec();
+    double turnVelocity = m_turningFlywheel.getAngularVelocityRadPerSec();
 
-    double drivingPosition = m_drivingSparkSim.getPosition();
-    double drivingVelocity = m_drivingSparkSim.getVelocity();
-    double turningPosition = m_turningSparkSim.getPosition();
-    double turningVelocity = m_turningSparkSim.getVelocity();
-}
+    double vbus = RoboRioSim.getVInVoltage();
+
+    m_drivingSparkSim.iterate(driveVelocity, vbus, dt);
+    m_turningSparkSim.iterate(turnVelocity, vbus, dt);
+  }
 }
