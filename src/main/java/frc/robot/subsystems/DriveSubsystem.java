@@ -347,4 +347,10 @@ public class DriveSubsystem extends SubsystemBase {
     m_rearLeft.simulationPeriodic(dt);
     m_rearRight.simulationPeriodic(dt);
   }
+
+  public Pose2d getSimPose() {
+    return m_odometry
+        .getEstimatedPosition(); // TODO: seperate simulation pose from estimated pose so we can
+    // test odometry and vision
+  }
 }

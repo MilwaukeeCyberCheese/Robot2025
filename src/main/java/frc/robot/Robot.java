@@ -72,6 +72,14 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData(CommandScheduler.getInstance());
   }
 
+  @Override
+  public void simulationInit() {}
+
+  @Override
+  public void simulationPeriodic() {
+    vision.simulationPeriodic(m_robotContainer.m_driveSubsystem.getSimPose());
+  }
+
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
   public void disabledInit() {}
