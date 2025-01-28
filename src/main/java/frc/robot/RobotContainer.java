@@ -33,7 +33,7 @@ public class RobotContainer {
   FilteredJoystick m_rightJoystick = new FilteredJoystick(Constants.OIConstants.kRightJoystickPort);
 
   private final SwerveSubsystem m_drive =
-      new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve/neo"));
+      new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve/maxSwerve"));
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
