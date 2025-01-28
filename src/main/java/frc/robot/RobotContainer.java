@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.DriveCommand;
-import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.utils.FilteredController;
 import frc.robot.utils.FilteredJoystick;
 
@@ -22,7 +20,7 @@ import frc.robot.utils.FilteredJoystick;
  */
 public class RobotContainer {
   // The robot's subsystems
-  public static final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
+  // public static final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
 
   // The driver's controller
   FilteredController m_operatorController =
@@ -36,16 +34,16 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    m_driveSubsystem.setDefaultCommand(
-        new DriveCommand(
-            m_driveSubsystem,
-            m_rightJoystick::getX,
-            m_rightJoystick::getY,
-            m_leftJoystick::getX,
-            () -> false,
-            Constants.DriveConstants.kRateLimitsEnabled,
-            m_rightJoystick::getButtonTwo,
-            m_rightJoystick::getThrottle));
+    // m_driveSubsystem.setDefaultCommand(
+    //     new DriveCommand(
+    //         m_driveSubsystem,
+    //         m_rightJoystick::getX,
+    //         m_rightJoystick::getY,
+    //         m_leftJoystick::getX,
+    //         () -> false,
+    //         Constants.DriveConstants.kRateLimitsEnabled,
+    //         m_rightJoystick::getButtonTwo,
+    //         m_rightJoystick::getThrottle));
   }
 
   /**
@@ -56,12 +54,12 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // button 7 on right joystick sets wheels to x
-    new Trigger(m_rightJoystick::getButtonSeven)
-        .whileTrue(m_driveSubsystem.run(() -> m_driveSubsystem.setX()));
+    // new Trigger(m_rightJoystick::getButtonSeven)
+    //     .whileTrue(m_driveSubsystem.run(() -> m_driveSubsystem.setX()));
 
     // zero gyro on right joystick button 5
-    new Trigger(m_rightJoystick::getButtonFive)
-        .onTrue(m_driveSubsystem.runOnce(() -> m_driveSubsystem.zeroHeading()));
+    // new Trigger(m_rightJoystick::getButtonFive)
+    //     .onTrue(m_driveSubsystem.runOnce(() -> m_driveSubsystem.zeroHeading()));
 
     new Trigger(m_operatorController::getLeftBumper)
         .and(m_operatorController::getRightBumper)

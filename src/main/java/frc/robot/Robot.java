@@ -60,8 +60,8 @@ public class Robot extends TimedRobot {
     visionEst.ifPresent(
         est -> {
           var estStdDevs = vision.getEstimationStdDevs();
-          RobotContainer.m_driveSubsystem.addVisionMeasurement(
-              est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+          // RobotContainer.m_driveSubsystem.addVisionMeasurement(
+          //     est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
         });
     CommandScheduler.getInstance().run();
     SmartDashboard.putData(CommandScheduler.getInstance());
@@ -95,8 +95,8 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    SmartDashboard.putString(
-        "Current Pose Auto", RobotContainer.m_driveSubsystem.getPose().toString());
+    // SmartDashboard.putString(
+    //     "Current Pose Auto", RobotContainer.m_driveSubsystem.getPose().toString());
   }
 
   @Override
