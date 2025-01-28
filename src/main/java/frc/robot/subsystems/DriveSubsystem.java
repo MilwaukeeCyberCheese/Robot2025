@@ -346,6 +346,24 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.simulationPeriodic(dt);
     m_rearLeft.simulationPeriodic(dt);
     m_rearRight.simulationPeriodic(dt);
+    SmartDashboard.putNumberArray("Drive Velocities", new double[] {
+      m_frontLeft.getDriveVelocity(),
+      m_frontRight.getDriveVelocity(),
+      m_rearLeft.getDriveVelocity(),
+      m_rearRight.getDriveVelocity()
+    });
+    SmartDashboard.putNumberArray("Turn Velocities", new double[] {
+      m_frontLeft.getTurnVelocity(),
+      m_frontRight.getTurnVelocity(),
+      m_rearLeft.getTurnVelocity(),
+      m_rearRight.getTurnVelocity()
+    });
+    SmartDashboard.putNumberArray("Module Angles", new double[] {
+      m_frontLeft.getState().angle.getRadians(),
+      m_frontRight.getState().angle.getRadians(),
+      m_rearLeft.getState().angle.getRadians(),
+      m_rearRight.getState().angle.getRadians()
+    });
   }
 
   public Pose2d getSimPose() {

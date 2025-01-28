@@ -21,6 +21,8 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import frc.robot.Constants;
+import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.ModuleConstants;
 
 public class MAXSwerveModule {
   private final SparkMax m_drivingSpark;
@@ -37,12 +39,17 @@ public class MAXSwerveModule {
   private final SparkClosedLoopController m_drivingClosedLoopController;
   private final SparkClosedLoopController m_turningClosedLoopController;
 
+  private double driveVelocity = 0;
+  private double turnVelocity = 0;
+
   private double m_chassisAngularOffset = 0;
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
 
   /**
-   * Constructs a MAXSwerveModule and configures the driving and turning motor, encoder, and PID
-   * controller. This configuration is specific to the REV MAXSwerve Module built with NEOs, SPARKS
+   * Constructs a MAXSwerveModule and configures the driving and turning motor,
+   * encoder, and PID
+   * controller. This configuration is specific to the REV MAXSwerve Module built
+   * with NEOs, SPARKS
    * MAX, and a Through Bore Encoder.
    */
   public MAXSwerveModule(int drivingCANId, int turningCANId, double chassisAngularOffset) {
@@ -51,27 +58,27 @@ public class MAXSwerveModule {
 
     m_drivingSparkSim = new SparkMaxSim(m_drivingSpark, DCMotor.getNeoVortex(1));
     m_turningSparkSim = new SparkMaxSim(m_turningSpark, DCMotor.getNeo550(1));
+    m_drivingSparkSim.setPosition(0);
+    m_turningSparkSim.setPosition(0);
+
     // TODO: get these values from the robot itself
     // heavier load, higher inertia
-    m_driveFlywheel =
-        new FlywheelSim(
-            LinearSystemId.createFlywheelSystem(
-                DCMotor.getNeoVortex(1),
-                0.125, // J = 1/2 * m * r^2 = 0.5 * 50 * 0.05^2
-                6.75), // L2 drive reduction
-            DCMotor.getNeoVortex(1));
+    m_driveFlywheel = new FlywheelSim(
+        LinearSystemId.identifyVelocitySystem(
+            DriveConstants.SimConstants.DriveMotor.kV * ModuleConstants.kWheelDiameterMeters / 2,
+            DriveConstants.SimConstants.DriveMotor.kA * ModuleConstants.kWheelDiameterMeters / 2),
+        DCMotor.getNeoVortex(1));
 
     // lighter load, lower inertia
-    m_turningFlywheel =
-        new FlywheelSim(
-            LinearSystemId.createFlywheelSystem(
-                DCMotor.getNeo550(1),
-                0.0125, // J = 1/2 * m * r^2 = 0.5 * 1 * 0.05^2
-                21.43), // L2 turn reduction
-            DCMotor.getNeo550(1));
+    m_turningFlywheel = new FlywheelSim(
+        LinearSystemId.identifyVelocitySystem(
+            DriveConstants.SimConstants.SteerMotor.kV,
+            DriveConstants.SimConstants.SteerMotor.kA),
+        DCMotor.getNeo550(1));
 
     m_drivingEncoder = m_drivingSpark.getEncoder();
     m_turningEncoder = m_turningSpark.getAbsoluteEncoder();
+    resetEncoders();
 
     m_drivingClosedLoopController = m_drivingSpark.getClosedLoopController();
     m_turningClosedLoopController = m_turningSpark.getClosedLoopController();
@@ -137,8 +144,7 @@ public class MAXSwerveModule {
     // Apply chassis angular offset to the desired state.
     SwerveModuleState correctedDesiredState = new SwerveModuleState();
     correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
-    correctedDesiredState.angle =
-        desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
+    correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
     correctedDesiredState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
@@ -166,12 +172,20 @@ public class MAXSwerveModule {
     m_driveFlywheel.update(dt);
     m_turningFlywheel.update(dt);
 
-    double driveVelocity = m_driveFlywheel.getAngularVelocityRadPerSec();
-    double turnVelocity = m_turningFlywheel.getAngularVelocityRadPerSec();
+    driveVelocity = m_driveFlywheel.getAngularVelocityRadPerSec();
+    turnVelocity = m_turningFlywheel.getAngularVelocityRadPerSec();
 
     double vbus = RoboRioSim.getVInVoltage();
 
     m_drivingSparkSim.iterate(driveVelocity, vbus, dt);
     m_turningSparkSim.iterate(turnVelocity, vbus, dt);
+  }
+
+  public double getDriveVelocity() {
+    return driveVelocity;
+  } 
+
+  public double getTurnVelocity() {
+    return turnVelocity;
   }
 }
