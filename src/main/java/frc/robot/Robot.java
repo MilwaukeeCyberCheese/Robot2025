@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private Vision vision;
   private RobotContainer m_robotContainer;
 
   /**
@@ -32,7 +31,6 @@ public class Robot extends TimedRobot {
     // and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    vision = new Vision();
 
     if (isSimulation()) {
       DriverStation.refreshData();
@@ -56,13 +54,6 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods. This must be called from the
     // robot's periodic
     // block in order for anything in the Command-based framework to work.
-    var visionEst = vision.getEstimatedGlobalPose();
-    visionEst.ifPresent(
-        est -> {
-          var estStdDevs = vision.getEstimationStdDevs();
-          // RobotContainer.m_driveSubsystem.addVisionMeasurement(
-          //     est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-        });
     CommandScheduler.getInstance().run();
     SmartDashboard.putData(CommandScheduler.getInstance());
   }
