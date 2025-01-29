@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
-import swervelib.SwerveInputStream;
 import java.io.File;
+import swervelib.SwerveInputStream;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -26,13 +26,15 @@ public class RobotContainer {
   private final CommandXboxController m_driverController = new CommandXboxController(0);
 
   // Configure drive input stream
-  SwerveInputStream driveInput = SwerveInputStream.of(m_drive.getSwerveDrive(),
-      () -> m_driverController.getLeftY(),
-      () -> m_driverController.getLeftX())
-      .withControllerRotationAxis(() -> -m_driverController.getRightX())
-      .deadband(0.1)
-      .scaleTranslation(0.8)
-      .allianceRelativeControl(true);
+  SwerveInputStream driveInput =
+      SwerveInputStream.of(
+              m_drive.getSwerveDrive(),
+              () -> m_driverController.getLeftY(),
+              () -> m_driverController.getLeftX())
+          .withControllerRotationAxis(() -> -m_driverController.getRightX())
+          .deadband(0.1)
+          .scaleTranslation(0.8)
+          .allianceRelativeControl(true);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -53,8 +55,9 @@ public class RobotContainer {
     m_driverController.a().onTrue(Commands.runOnce(m_drive::zeroGyro));
 
     // Lock wheels with left bumper
-    m_driverController.leftBumper().whileTrue(
-        Commands.runOnce(m_drive::lock, m_drive).repeatedly());
+    m_driverController
+        .leftBumper()
+        .whileTrue(Commands.runOnce(m_drive::lock, m_drive).repeatedly());
   }
 
   /**
