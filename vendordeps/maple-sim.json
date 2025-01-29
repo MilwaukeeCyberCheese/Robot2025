@@ -13,7 +13,7 @@
         {
             "groupId": "org.ironmaple",
             "artifactId": "maplesim-java",
-            "version": "0.3.4"
+            "version": "0.3.3"
         },
         {
             "groupId": "org.dyn4j",
