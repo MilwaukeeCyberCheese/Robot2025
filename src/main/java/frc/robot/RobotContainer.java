@@ -4,15 +4,14 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.OIConstants;
-import frc.robot.commands.DriveCommand;
-import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.utils.FilteredController;
-import frc.robot.utils.FilteredJoystick;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import java.io.File;
+import swervelib.SwerveInputStream;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -21,31 +20,28 @@ import frc.robot.utils.FilteredJoystick;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems
-  public static final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
+  private final SwerveSubsystem m_drive =
+      new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve/maxSwerve"));
 
-  // The driver's controller
-  FilteredController m_operatorController =
-      new FilteredController(OIConstants.kOperatorControllerPort);
-  FilteredJoystick m_leftJoystick = new FilteredJoystick(Constants.OIConstants.kLeftJoystickPort);
-  FilteredJoystick m_rightJoystick = new FilteredJoystick(Constants.OIConstants.kRightJoystickPort);
+  private final CommandXboxController m_driverController = new CommandXboxController(0);
+
+  // Configure drive input stream
+  SwerveInputStream driveInput =
+      SwerveInputStream.of(
+              m_drive.getSwerveDrive(),
+              () -> m_driverController.getLeftY(),
+              () -> m_driverController.getLeftX())
+          .withControllerRotationAxis(() -> -m_driverController.getRightX())
+          .deadband(0.1)
+          .scaleTranslation(0.8)
+          .allianceRelativeControl(true);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
-    // Configure the button bindings
     configureButtonBindings();
 
-    m_driveSubsystem.setDefaultCommand(
-        new DriveCommand(
-            m_driveSubsystem,
-            m_rightJoystick::getX,
-            m_rightJoystick::getY,
-            m_leftJoystick::getX,
-            () -> false,
-            Constants.DriveConstants.kRateLimitsEnabled,
-            m_rightJoystick::getButtonTwo,
-            m_rightJoystick::getThrottle));
+    // Set default drive command
+    m_drive.setDefaultCommand(m_drive.driveFieldOriented(driveInput));
   }
 
   /**
@@ -55,23 +51,13 @@ public class RobotContainer {
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
-    // button 7 on right joystick sets wheels to x
-    new Trigger(m_rightJoystick::getButtonSeven)
-        .whileTrue(m_driveSubsystem.run(() -> m_driveSubsystem.setX()));
+    // Zero gyro with A button
+    m_driverController.a().onTrue(Commands.runOnce(m_drive::zeroGyro));
 
-    // zero gyro on right joystick button 5
-    new Trigger(m_rightJoystick::getButtonFive)
-        .onTrue(m_driveSubsystem.runOnce(() -> m_driveSubsystem.zeroHeading()));
-
-    new Trigger(m_operatorController::getLeftBumper)
-        .and(m_operatorController::getRightBumper)
-        .onTrue(
-            new Command() {
-              @Override
-              public void initialize() {
-                CommandScheduler.getInstance().cancelAll();
-              }
-            });
+    // Lock wheels with left bumper
+    m_driverController
+        .leftBumper()
+        .whileTrue(Commands.runOnce(m_drive::lock, m_drive).repeatedly());
   }
 
   /**
