@@ -32,7 +32,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +40,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.json.simple.parser.ParseException;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -96,7 +94,7 @@ public class SwerveSubsystem extends SubsystemBase {
       throw new RuntimeException(e);
     }
 
-    // Simulation 
+    // Simulation
     simDrive = swerveDrive.getMapleSimDrive();
 
     swerveDrive.setHeadingCorrection(
