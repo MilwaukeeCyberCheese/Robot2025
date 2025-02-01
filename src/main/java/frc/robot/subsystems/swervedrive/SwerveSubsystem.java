@@ -145,7 +145,7 @@ public class SwerveSubsystem extends SubsystemBase {
   /** Setup the chassis simulation with the correct physical dimensions to match CAD. */
   public void setupChassisSim() {
     if (simDrive.isPresent()) {
-      simDrive.get()
+      // TODO: figure out setting dimensions
     }
   }
 
