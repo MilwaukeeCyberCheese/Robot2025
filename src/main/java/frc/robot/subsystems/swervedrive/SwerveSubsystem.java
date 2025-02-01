@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +41,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.json.simple.parser.ParseException;
 import org.photonvision.targeting.PhotonPipelineResult;
 import swervelib.SwerveController;
@@ -57,6 +60,8 @@ public class SwerveSubsystem extends SubsystemBase {
   /** Swerve drive object. */
   private final SwerveDrive swerveDrive;
 
+  public final Optional<SwerveDriveSimulation> simDrive;
+
   /** AprilTag field layout. */
   // private final AprilTagFieldLayout aprilTagFieldLayout =
   // AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
@@ -72,7 +77,8 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param directory Directory of swerve drive config files.
    */
   public SwerveSubsystem(File directory) {
-    // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being
+    // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary
+    // objects being
     // created.
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
     try {
@@ -82,12 +88,17 @@ public class SwerveSubsystem extends SubsystemBase {
                   Constants.DriveConstants.kMaxSpeedMetersPerSecond,
                   new Pose2d(
                       new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0)));
-      // Alternative method if you don't want to supply the conversion factor via JSON files.
+      // Alternative method if you don't want to supply the conversion factor via JSON
+      // files.
       // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed,
       // angleConversionFactor, driveConversionFactor);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+    // Simulation 
+    simDrive = swerveDrive.getMapleSimDrive();
+
     swerveDrive.setHeadingCorrection(
         false); // Heading correction should only be used while controlling the robot via angle.
     swerveDrive.setCosineCompensator(
@@ -100,14 +111,17 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.setModuleEncoderAutoSynchronize(
         false, 1); // Enable if you want to resynchronize your absolute encoders and motor encoders
     // periodically when they are not moving.
-    //    swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the
+    // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used
+    // over the
     // internal encoder and push the offsets onto it. Throws warning if not possible
     if (visionDriveTest) {
       setupPhotonVision();
-      // Stop the odometry thread if we are using vision that way we can synchronize updates better.
+      // Stop the odometry thread if we are using vision that way we can synchronize
+      // updates better.
       swerveDrive.stopOdometryThread();
     }
     setupPathPlanner();
+    setupChassisSim();
   }
 
   /**
@@ -124,6 +138,15 @@ public class SwerveSubsystem extends SubsystemBase {
             controllerCfg,
             Constants.DriveConstants.kMaxSpeedMetersPerSecond,
             new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)), Rotation2d.fromDegrees(0)));
+    simDrive = swerveDrive.getMapleSimDrive();
+    setupChassisSim();
+  }
+
+  /** Setup the chassis simulation with the correct physical dimensions to match CAD. */
+  public void setupChassisSim() {
+    if (simDrive.isPresent()) {
+      simDrive.get()
+    }
   }
 
   /** Setup the photon vision class. */
@@ -170,10 +193,12 @@ public class SwerveSubsystem extends SubsystemBase {
               swerveDrive.setChassisSpeeds(speedsRobotRelative);
             }
           },
-          // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally
+          // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also
+          // optionally
           // outputs individual module feedforwards
           new PPHolonomicDriveController(
-              // PPHolonomicController is the built in path following controller for holonomic drive
+              // PPHolonomicController is the built in path following controller for holonomic
+              // drive
               // trains
               new PIDConstants(5.0, 0.0, 0.0),
               // Translation PID constants
@@ -183,7 +208,8 @@ public class SwerveSubsystem extends SubsystemBase {
           config,
           // The robot configuration
           () -> {
-            // Boolean supplier that controls when the path will be mirrored for the red alliance
+            // Boolean supplier that controls when the path will be mirrored for the red
+            // alliance
             // This will flip the path being followed to the red side of the field.
             // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
@@ -241,7 +267,8 @@ public class SwerveSubsystem extends SubsystemBase {
    * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
    */
   public Command getAutonomousCommand(String pathName) {
-    // Create a path following command using AutoBuilder. This will also trigger event markers.
+    // Create a path following command using AutoBuilder. This will also trigger
+    // event markers.
     return new PathPlannerAuto(pathName);
   }
 
@@ -424,7 +451,8 @@ public class SwerveSubsystem extends SubsystemBase {
       DoubleSupplier translationY,
       DoubleSupplier headingX,
       DoubleSupplier headingY) {
-    // swerveDrive.setHeadingCorrection(true); // Normally you would want heading correction for
+    // swerveDrive.setHeadingCorrection(true); // Normally you would want heading
+    // correction for
     // this kind of control.
     return run(
         () -> {
