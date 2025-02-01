@@ -147,6 +147,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
+  public SwerveDriveSimulation getSimDrive() {
+    return simDrive.orElse(null);
+  }
+
   /** Setup the photon vision class. */
   public void setupPhotonVision() {
     vision = new Vision(swerveDrive::getPose, swerveDrive.field);

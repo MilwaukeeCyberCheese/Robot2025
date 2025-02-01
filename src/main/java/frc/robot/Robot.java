@@ -30,6 +30,8 @@ public class Robot extends TimedRobot {
   StructArrayPublisher<Pose3d> algaePoses =
       NetworkTableInstance.getDefault().getStructArrayTopic("Algae", Pose3d.struct).publish();
 
+  private static Robot m_instance;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -40,12 +42,17 @@ public class Robot extends TimedRobot {
     // and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    m_instance = this;
 
     if (isSimulation()) {
       DriverStation.refreshData();
       DriverStation.silenceJoystickConnectionWarning(true);
       SimulatedArena.getInstance().resetFieldForAuto();
     }
+  }
+
+  public static Robot getInstance() {
+    return m_instance;
   }
 
   /**
