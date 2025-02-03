@@ -4,11 +4,15 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.ironmaple.simulation.SimulatedArena;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -21,6 +25,13 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
 
+  StructArrayPublisher<Pose3d> coralPoses =
+      NetworkTableInstance.getDefault().getStructArrayTopic("Coral", Pose3d.struct).publish();
+  StructArrayPublisher<Pose3d> algaePoses =
+      NetworkTableInstance.getDefault().getStructArrayTopic("Algae", Pose3d.struct).publish();
+
+  private static Robot m_instance;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -31,11 +42,17 @@ public class Robot extends TimedRobot {
     // and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    m_instance = this;
 
     if (isSimulation()) {
       DriverStation.refreshData();
       DriverStation.silenceJoystickConnectionWarning(true);
+      SimulatedArena.getInstance().resetFieldForAuto();
     }
+  }
+
+  public static Robot getInstance() {
+    return m_instance;
   }
 
   /**
@@ -87,7 +104,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     // SmartDashboard.putString(
-    //     "Current Pose Auto", RobotContainer.m_driveSubsystem.getPose().toString());
+    // "Current Pose Auto", RobotContainer.m_driveSubsystem.getPose().toString());
   }
 
   @Override
@@ -114,4 +131,12 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
+
+  @Override
+  public void simulationPeriodic() {
+    coralPoses.accept(
+        SimulatedArena.getInstance().getGamePiecesByType("Coral").toArray(Pose3d[]::new));
+    algaePoses.accept(
+        SimulatedArena.getInstance().getGamePiecesByType("Algae").toArray(Pose3d[]::new));
+  }
 }

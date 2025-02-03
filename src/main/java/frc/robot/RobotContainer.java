@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.CoralHandlerSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import swervelib.SwerveInputStream;
@@ -20,23 +21,25 @@ import swervelib.SwerveInputStream;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  private final SwerveSubsystem m_drive =
-      new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve/maxSwerve"));
+  private final SwerveSubsystem m_drive = new SwerveSubsystem(
+      new File(Filesystem.getDeployDirectory(), "swerve/maxSwerve"));
+  private final CoralHandlerSubsystem m_coral = new CoralHandlerSubsystem(m_drive.getSimDrive());
 
   private final CommandXboxController m_driverController = new CommandXboxController(0);
 
   // Configure drive input stream
-  SwerveInputStream driveInput =
-      SwerveInputStream.of(
-              m_drive.getSwerveDrive(),
-              () -> m_driverController.getLeftY(),
-              () -> m_driverController.getLeftX())
-          .withControllerRotationAxis(() -> -m_driverController.getRightX())
-          .deadband(0.1)
-          .scaleTranslation(0.8)
-          .allianceRelativeControl(true);
+  SwerveInputStream driveInput = SwerveInputStream.of(
+      m_drive.getSwerveDrive(),
+      () -> m_driverController.getLeftY(),
+      () -> m_driverController.getLeftX())
+      .withControllerRotationAxis(() -> -m_driverController.getRightX())
+      .deadband(0.1)
+      .scaleTranslation(0.8)
+      .allianceRelativeControl(true);
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     configureButtonBindings();
 
@@ -45,9 +48,12 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then calling passing it to a
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
+   * instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of its
+   * subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then calling
+   * passing it to a
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
@@ -56,8 +62,11 @@ public class RobotContainer {
 
     // Lock wheels with left bumper
     m_driverController
+        .rightBumper()
+        .onTrue(Commands.runOnce(m_coral::intake));
+    m_driverController
         .leftBumper()
-        .whileTrue(Commands.runOnce(m_drive::lock, m_drive).repeatedly());
+        .onTrue(Commands.runOnce(m_coral::outtake));
   }
 
   /**
